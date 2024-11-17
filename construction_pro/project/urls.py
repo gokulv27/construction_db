@@ -1,8 +1,7 @@
-from django.urls import path # type: ignore
+from django.urls import path
 from . import views
 
 urlpatterns = [
-    # path('', views.home, name='home'),  # Home page
-    path('project/', views.project_list, name='project_list'),  # Project list
-    path('project/<int:pk>/', views.project_detail, name='project_detail'),  # Project detail
+    path('', views.project_list, name='project_list'),  # List all projects
+    path('<int:pk>/', views.project_detail, name='project_detail'),  # Details of a specific project
 ]
