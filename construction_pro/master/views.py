@@ -6,7 +6,7 @@ from .forms import EmployeeRoleForm, EmployeeTypeForm, VendorTypeForm, BrandForm
 import json
 
 def master_list(request):
-    return render(request, 'master_dashboard.html')
+    return render(request, 'master/master_list.html')
 
 @csrf_exempt
 def api_items(request, item_type=None, pk=None):
