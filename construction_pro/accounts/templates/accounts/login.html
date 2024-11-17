@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Saasta Login</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div>
+                <h1>Welcome to Sri Saasta</h1>
+                <p>Welcome to Sri Saasta's secure login page. Please enter your username and password to access your account. As a company committed to providing innovative solutions, we ensure that your data is protected with the highest security standards.</p>
+                <p>Whether you're here to manage your account, track orders, or access our exclusive services, your experience matters to us.</p>
+            </div>
+            <button class="know-more">Know More</button>
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+        </div>
+        <div class="right-panel">
+            <div class="login-form">
+                <h2>Sign In</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 1rem;">Enter your credentials to access your account</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" placeholder="Enter password" required>
+                    </div>
+                    <button type="submit" class="login-btn">LOGIN</button>
+                </form>
+                {% if messages %}
+                <div id="message">
+                    {% for message in messages %}
+                    <p class="{{ message.tags }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="links">
+                    <p style="text-align: center;">Having issues? <a href="#">Contact support</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
