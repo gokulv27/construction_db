@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+    }
+    h1, h2 {
+        color: #2c3e50;
+    }
+    form {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    button {
+        background-color: #000000;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    button:hover {
+        background-color: #2980b9;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    th, td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+        background-color: #000000;
+        color: white;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    tr:hover {
+        background-color: #e0e0e0;
+    }
+    a {
+        color: #000000;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<h1>Client Management</h1>
+<h2>Add New Client</h2>
+<form method="post" action="{% url 'add_client' %}">
+    {% csrf_token %}
+    <input type="text" name="client_lead_name" placeholder="Client Lead Name" required>
+    <input type="tel" name="phone1" placeholder="Phone 1" required>
+    <input type="tel" name="phone2" placeholder="Phone 2 (optional)">
+    <input type="email" name="email" placeholder="Email" required>
+    <button type="submit">Add Client</button>
+</form>
+<form method="get" action="{% url 'client_list' %}">
+    <input type="text" name="search" placeholder="Search clients..." value="{{ request.GET.search }}">
+    <button type="submit">Search</button>
+</form>
+
+
+
+<h2>Client List</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Client Lead Name</th>
+            <th>Phone 1</th>
+            <th>Phone 2</th>
+            <th>Email</th>
+            <th>Projects</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for client in clients %}
+        <tr>
+            <td>{{ client.client_lead_name }}</td>
+            <td>{{ client.phone1 }}</td>
+            <td>{{ client.phone2|default_if_none:"-" }}</td>
+            <td>{{ client.email }}</td>
+            <td><a href="{% url 'project_list' client.id %}">View Projects</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No clients found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

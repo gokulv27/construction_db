@@ -1,0 +1,347 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Pro - Master Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-between p-4 border-b">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded bg-black"></div>
+                    <span class="text-xl font-bold">Construction Pro</span>
+                </div>
+                <button id="closeSidebar" class="md:hidden text-gray-500 hover:text-gray-700">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            <nav class="mt-5 px-4">
+                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-md">
+                    <i class="ri-menu-line mr-3 text-lg"></i>
+                    Master
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden md:ml-64">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-16">
+                        <div class="flex items-center">
+                            <button id="sidebarToggle" class="md:hidden text-gray-500 hover:text-gray-700">
+                                <i class="ri-menu-line text-2xl"></i>
+                            </button>
+                            <h1 class="ml-2 text-xl font-semibold text-gray-800">Master Data</h1>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mb-4 sm:mb-0">
+                            <div class="relative">
+                                <input type="text" id="searchInput" placeholder="Search..." class="w-full sm:w-64 pl-10 pr-4 py-2 border rounded-md">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="ri-search-line text-gray-400"></i>
+                                </div>
+                            </div>
+                            <select id="typeFilter" class="w-full sm:w-auto mt-3 sm:mt-0 border rounded-md px-4 py-2">
+                                <option value="">All Types</option>
+                                <option value="employee_role">Employee Roles</option>
+                                <option value="employee_type">Employee Types</option>
+                                <option value="vendor_type">Vendor Types</option>
+                                <option value="brand">Brands</option>
+                            </select>
+                        </div>
+                        <button id="addButton" class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800">
+                            <i class="ri-add-line mr-2"></i>
+                            Add
+                        </button>
+                    </div>
+
+                    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Table rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle" class="text-xl font-bold mb-4">Add New Item</h2>
+            <form id="itemForm">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="itemName" class="block text-gray-700 text-sm font-bold mb-2">Name</label>
+                    <input type="text" id="itemName" name="itemName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div class="mb-4">
+                    <label for="itemType" class="block text-gray-700 text-sm font-bold mb-2">Item Type</label>
+                    <select id="itemType" name="itemType" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                        <option value="employee_role">Employee Role</option>
+                        <option value="employee_type">Employee Type</option>
+                        <option value="vendor_type">Vendor Type</option>
+                        <option value="brand">Brand</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Item data
+        let items = [];
+
+        // DOM elements
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const itemTableBody = document.getElementById('itemTableBody');
+        const searchInput = document.getElementById('searchInput');
+        const typeFilter = document.getElementById('typeFilter');
+        const addButton = document.getElementById('addButton');
+        const modal = document.getElementById('itemModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const closeModal = document.getElementsByClassName('close')[0];
+        const itemForm = document.getElementById('itemForm');
+        const itemNameInput = document.getElementById('itemName');
+        const itemTypeInput = document.getElementById('itemType');
+
+        // Sidebar functionality
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        closeSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+        });
+
+        // Modal functionality
+        addButton.onclick = () => {
+            modalTitle.textContent = 'Add New Item';
+            itemNameInput.value = '';
+            itemTypeInput.value = typeFilter.value || 'employee_role';
+            modal.style.display = 'block';
+        }
+
+        closeModal.onclick = () => {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Form submission
+        itemForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const name = itemNameInput.value;
+            const type = itemTypeInput.value;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            if (modalTitle.textContent === 'Add New Item') {
+                try {
+                    const response = await fetch(`/api/items/${type}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                        },
+                        body: JSON.stringify({ name }),
+                    });
+                    if (response.ok) {
+                        const newItem = await response.json();
+                        items.push(newItem);
+                        renderTable();
+                    }
+                } catch (error) {
+                    console.error('Error adding item:', error);
+                }
+            } else {
+                const id = parseInt(modalTitle.dataset.editId);
+                try {
+                    const response = await fetch(`/api/items/${type}/${id}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                        },
+                        body: JSON.stringify({ name }),
+                    });
+                    if (response.ok) {
+                        const updatedItem = await response.json();
+                        const index = items.findIndex(item => item.id === id);
+                        if (index !== -1) {
+                            items[index] = updatedItem;
+                        }
+                        renderTable();
+                    }
+                } catch (error) {
+                    console.error('Error updating item:', error);
+                }
+            }
+            modal.style.display = 'none';
+            itemForm.reset();
+        }
+
+        // Table rendering
+        function renderTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterType = typeFilter.value;
+
+            const filteredItems = items.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) &&
+                (filterType === "" || item.type === filterType)
+            );
+
+            itemTableBody.innerHTML = filteredItems.map(item => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">${item.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${item.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${getReadableType(item.type)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="editItem(${item.id})" class="text-black-600 hover:text-black-900 mr-2">Edit</button>
+                        <button onclick="deleteItem(${item.id}, '${item.type}')" class="text-black-600 hover:text-black-900">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getReadableType(type) {
+            const typeMap = {
+                'employee_role': 'Employee Role',
+                'employee_type': 'Employee Type',
+                'vendor_type': 'Vendor Type',
+                'brand': 'Brand'
+            };
+            return typeMap[type] || type;
+        }
+
+        // Edit item
+        function editItem(id) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                modalTitle.textContent = 'Edit Item';
+                modalTitle.dataset.editId = id;
+                itemNameInput.value = item.name;
+                itemTypeInput.value = item.type;
+                modal.style.display = 'block';
+            }
+        }
+
+        // Delete item
+        async function deleteItem(id, type) {
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            try {
+                const response = await fetch(`/api/items/${type}/${id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                });
+                if (response.ok) {
+                    items = items.filter(i => i.id !== id);
+                    renderTable();
+                }
+            } catch (error) {
+                console.error('Error deleting item:', error);
+            }
+        }
+
+        // Event listeners for search and filter
+        searchInput.addEventListener('input', renderTable);
+        typeFilter.addEventListener('change', renderTable);
+
+        // Initial data fetch and render
+        async function fetchItems() {
+            try {
+                const response = await fetch('/api/items/');
+                if (response.ok) {
+                    items = await response.json();
+                    renderTable();
+                }
+            } catch (error) {
+                console.error('Error fetching items:', error);
+            }
+        }
+
+        fetchItems();
+    </script>
+</body>
+</html>

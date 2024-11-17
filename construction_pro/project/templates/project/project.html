@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Construction Dashboard{% endblock %}</title>
+    <style>
+        /* ... previous styles ... */
+    
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            height: 100vh;
+        }
+        /* Layout */
+        .dashboard {
+            
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+         /* Sidebar styles */
+         .sidebar {
+            width: 250px;
+            background-color: #fff;
+            color: #000000;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .logo h1 {
+            font-size: 1.2rem;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            color: #000000;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .nav-item svg {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #f4f4f4;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .search-new {
+            display: flex;
+            gap: 10px;
+        }
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+        .new-project-btn {
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .new-project-btn svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .project-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .project-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .project-location {
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        .project-status {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #000000;
+            color: #ffffff;
+            border-radius: 9999px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        .project-progress {
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-value {
+            height: 100%;
+            background-color: #000000;
+        }
+        .project-budget, .project-spent {
+            margin-bottom: 5px;
+        }
+        .project-team {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .team-member {
+            width: 30px;
+            height: 30px;
+            background-color: #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 2px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+        .form-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-cancel {
+            background-color: #e5e7eb;
+            color: #374151;
+            margin-right: 10px;
+        }
+        .btn-create {
+            background-color: #000000;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Construction Pro Logo">
+            <h1>Construction Pro</h1>
+        </div>
+        <nav>
+          
+           
+        </nav>
+    </aside>
+    <main class="main-content">
+        <header class="header">
+            <h1>Projects</h1>
+            <div class="search-new">
+                <input type="text" class="search-input" placeholder="Search projects...">
+                <button class="new-project-btn" onclick="openModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    New Project
+                </button>
+            </div>
+        </header>
+       
+        <div class="projects-grid">
+            {% for project in projects %}
+            <div class="project-card">
+                <h2 class="project-title">{{ project.lead_name }}</h2>
+                <p class="project-location">{{ project.location }}</p>
+                <span class="project-status">{{ project.get_status_display }}</span>
+                <div class="project-progress">
+                    <p>Progress: {{ project.progress }}%</p>
+                    <div class="progress-bar">
+                        
+                    </div>
+                </div>
+                <p class="project-budget">Budget: ${{ project.budget|floatformat:2 }}</p>
+                <p class="project-spent">Spent: ${{ project.spent|floatformat:2 }}</p>
+                <div class="project-team">
+                    {% for member in project.team.all|slice:":3" %}
+                    <div class="team-member" title="{{ member.name }}">{{ member.initials }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No projects found.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+    <div id="newProjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Create New Project</h2>
+            <form id="newProjectForm" method="post" action="">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="lead_name">Lead Name</label>
+                        <input type="text" id="lead_name" name="lead_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mobile">Mobile</label>
+                        <input type="tel" id="mobile" name="mobile" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">Budget</label>
+                        <input type="number" id="budget" name="budget" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="land_facing">Land Facing</label>
+                        <select id="land_facing" name="land_facing" required>
+                            <option value="">Select direction</option>
+                            <option value="N">North</option>
+                            <option value="S">South</option>
+                            <option value="E">East</option>
+                            <option value="W">West</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="land_width">Land Width</label>
+                        <input type="number" id="land_width" name="land_width" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="land_breadth">Land Breadth</label>
+                        <input type="number" id="land_breadth" name="land_breadth" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="num_floors">Number of Floors</label>
+                        <input type="number" id="num_floors" name="num_floors" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="build_area">Build Area</label>
+                        <input type="number" id="build_area" name="build_area" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-create">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('newProjectModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('newProjectModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('newProjectModal')) {
+                closeModal();
+            }
+        }
+
+        document.getElementById('newProjectForm').addEventListener('submit', function(e) {
+            // Form submission is handled by Django, so we don't need to prevent default
+            closeModal();
+        });
+    </script>
+</body>
+</html>
